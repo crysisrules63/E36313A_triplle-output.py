@@ -1,0 +1,56 @@
+import pyvisa
+import time
+from time import sleep
+import os
+
+# Datalogging: create a time-stamped file
+dateString = time.strftime("%Y-%m-%d_%H%M")
+filepath = "./" + dateString + ".csv"
+
+rm = pyvisa.ResourceManager()
+#res = rm.list_resources()
+print("Find following resources: ")
+print("Resources detected\n{}\n".format(rm.list_resources()))
+#vm = rm.open_resource("USB0::0x2A8D::0x1202::MY61004198::0::INSTR")
+vm = rm.open_resource("USB0::0x2A8D::0x1002::MY61002159::INSTR")
+vm.write('SYST:REM')
+vm.write('APPL CH1, 6V, 1A')
+vm.write('OUTP ON')
+vm.write('APPL CH3, -9V, 0.5A')
+vm.write('OUTP ON')
+vm.write('APPL CH2, 3.3v, .25')
+vm.write('OUTP ON')
+
+print('Power on...waiting for settling')
+time.sleep(5)
+
+print('Taking measurements channel1')
+voltCH1 = float(vm.query('MEAS:VOLT? CH1'))
+currentCH1 = float(vm.query('MEAS:CURR? CH1'))
+powerCH1 = voltCH1 * currentCH1
+# write results to console
+print(f'V={voltCH1:.1f}V I={currentCH1:.2f}A P={powerCH1:.2f}W\n\n')
+
+
+print('Taking measurements channel3')
+voltCH3 = float(vm.query('MEAS:VOLT? CH3'))
+currentCH3 = float(vm.query('MEAS:CURR? CH3'))
+powerCH3 = voltCH3 * currentCH3
+# write results to console
+print(f'V={voltCH3:.1f}V I={currentCH3:.2f}A P={powerCH3:.2f}W\n\n')
+
+
+print('Taking measurements channel2')
+voltCH2 = float(vm.query('MEAS:VOLT? CH2'))
+currentCH2 = float(vm.query('MEAS:CURR? CH2'))
+powerCH2 = voltCH2 * currentCH2
+# write results to console
+print(f'V={voltCH2:.1f}V I={currentCH2:.2f}A P={powerCH2:.2f}W')
+
+#vm.write('APPL CH1, 0V,0A')
+#vm.write('OUTP OFF')
+#vm.write('APPL CH3, 0V, 0.0A')
+#vm.write('OUTP OFF')
+
+#vm.write('OUTP OFF')
+#print('All channels OFF')
